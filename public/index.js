@@ -1,6 +1,9 @@
 const mapImage = new Image();
 mapImage.src = '/Desert1.png';
 
+const santaImage = new Image();
+santaImage.src = '/santa.png';
+
 const canvasEl = document.getElementById('canvas');
 canvasEl.width = window.innerWidth;
 canvasEl.height = window.innerHeight;
@@ -10,6 +13,7 @@ const canvas = canvasEl.getContext("2d");
 const socket = io([`ws://localhost:3009`]);
 
 let map = [[]];
+let players = [];
 
 const TILE_SIZE = 16;
 
@@ -20,6 +24,49 @@ socket.on('connect', () => {
 socket.on('map', (loadedMap) => {
     map = loadedMap;
 });
+
+socket.on('players', (serverPlayers) => {
+    players = serverPlayers;
+});
+
+// KEYDOWN LISTENER
+ window.addEventListener("keydown", (e) => {
+     console.log(e.key);
+
+     if (e.key === "w") {
+        inputs["up"] = true;
+     } else if (e.key === "s") {
+        inputs["down"] = true;
+     } else if (e.key === "d") {
+        inputs["right"] = true;
+     } else if (e.key === "a") {
+        inputs["left"] = true;
+     }
+     socket.emit('inputs', inputs);
+ });
+
+// KEYUP LISTENER
+window.addEventListener("keyup", (e) => {
+    console.log(e.key);
+
+    if (e.key === "w") {
+       inputs["up"] = false;
+    } else if (e.key === "s") {
+       inputs["down"] = false;
+    } else if (e.key === "d") {
+       inputs["right"] = false;
+    } else if (e.key === "a") {
+       inputs["left"] = false;
+    }
+    socket.emit('inputs', inputs);
+});
+
+const inputs = {
+    up: false,
+    down: false,
+    left: false,
+    right: false,
+};
 
 function loop() {
     canvas.clearRect(0, 0, canvas.width, canvas.height);
@@ -47,8 +94,11 @@ function loop() {
         }
     }
 
-    canvas.fillStyle = "#ff0000";
-    canvas.fillRect(0, 0, 10, 10);
+    for (const player of players) {
+        canvas.drawImage(santaImage, player.x, player.y);
+    }
+
     window.requestAnimationFrame(loop);
 }
+
 window.requestAnimationFrame(loop);
