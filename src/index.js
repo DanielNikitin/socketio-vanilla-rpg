@@ -86,3 +86,5 @@ setInterval(tick, 1000 / TICK_RATE);
 }
 
 Main();
+
+// npm run dev
